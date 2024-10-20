@@ -1,0 +1,43 @@
+<!-- templates/print_invoice.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ language_dict['invoice'] }} #{{ invoice.invoice_number }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ language_dict['invoice'] }} #{{ invoice.invoice_number }}</h1>
+    <p>{{ language_dict['date'] }}: {{ invoice.invoice_date }}</p>
+    <p>{{ language_dict['client'] }}: {{ invoice.client.company_name }}</p>
+    <p>{{ language_dict['currency'] }}: {{ invoice.currency }}</p>
+
+    <h3>{{ language_dict['services'] }}</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>{{ language_dict['service'] }}</th>
+                <th>{{ language_dict['unit_cost'] }}</th>
+                <th>{{ language_dict['quantity'] }}</th>
+                <th>{{ language_dict['line_total'] }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service in services %}
+            <tr>
+                <td>{{ service.service }}</td>
+                <td>{{ service.unit_cost }} {{ invoice.currency }}</td>
+                <td>{{ service.quantity }}</td>
+                <td>{{ service.line_total }} {{ invoice.currency }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>{{ language_dict['summary'] }}</h3>
+    <p>{{ language_dict['subtotal'] }}: {{ subtotal }} {{ invoice.currency }}</p>
+    <p>{{ language_dict['discount'] }}: {{ discount }} %</p>
+    {% if vat_amount > 0 %}
+    <p>{{ language_dict['vat'] }} ({{ invoice.vat_percentage }}%): {{ vat_amount }}</p>
+    {% endif %}
+    <h4>{{ language_dict['total'] }}: {{ total }} {{ invoice.currency }}</h4>
+</div>
+{% endblock %}
