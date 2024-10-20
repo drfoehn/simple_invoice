@@ -1,0 +1,78 @@
+<!-- templates/edit_client.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit Client' if client else 'Add Client' }} - Invoicing App{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ 'Edit Client' if client else 'Add Client' }}</h1>
+    <form action="{{ url_for('edit_client', client_id=client_id) if client else url_for('create_client') }}" method="post">
+        <div class="form-group">
+            <label for="company_name">Company Name</label>
+            <input type="text" class="form-control" name="company_name" value="{{ client.company_name if client else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="vat_number">VAT Number</label>
+            <input type="text" class="form-control" name="vat_number" value="{{ client.vat_number if client else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="vat_percentage">VAT Percentage</label>
+            <input type="text" class="form-control" name="vat_percentage" value="{{ client.vat_percentage if client else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="street">Street</label>
+            <input type="text" class="form-control" name="street" value="{{ client.street if client else '' }}" >
+        </div>
+        <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" class="form-control" name="city" value="{{ client.city if client else '' }}" >
+        </div>
+        <div class="form-group">
+            <label for="state">State</label>
+            <input type="text" class="form-control" name="state" value="{{ client.state if client else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="postal_code">Postal Code</label>
+            <input type="text" class="form-control" name="postal_code" value="{{ client.postal_code if client else '' }}">
+        </div>
+        <div class="form-group">
+            <label for="country">Country</label>
+            <input type="text" class="form-control" name="country" value="{{ client.country if client else '' }}" >
+        </div>
+        <div class="form-group">
+            <label for="first_name">First Name</label>
+            <input type="text" class="form-control" name="first_name" value="{{ client.first_name if client else '' }}" >
+        </div>
+        <div class="form-group">
+            <label for="last_name">Last Name</label>
+            <input type="text" class="form-control" name="last_name" value="{{ client.last_name if client else '' }}" >
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" name="email" value="{{ client.email if client else '' }}" >
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="text" class="form-control" name="phone" value="{{ client.phone if client else '' }}" >
+        </div>
+        <div class="form-group">
+            <label for="currency">Currency</label>
+            <select class="form-control" name="currency" id="currency" required>
+                <option value="EUR">EUR</option>
+                <option value="CAD">CAD</option>
+                <option value="USD">USD</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="language">Language of Invoice</label>
+            <input type="text" class="form-control" name="language" value="{{ client.language if client else '' }}" >
+        </div>
+        <div class="form-group">
+            <label for="payment_terms">Payment Terms</label>
+            <input type="text" class="form-control" name="payment_terms" value="{{ client.payment_terms if client else '' }}" >
+        </div>
+        <button type="submit" class="btn btn-primary">{{ 'Update Client' if client else 'Add Client' }}</button>
+    </form>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary mt-2">Back to Clients</a>
+</div>
+{% endblock %}
