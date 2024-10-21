@@ -6,6 +6,32 @@
 {% block content %}
 <div class="container mt-4">
     <h1>{{ language_dict['invoice'] }} #{{ invoice.invoice_number }}</h1>
+    
+    <!-- Persona Selection -->
+    <!--<form method="GET" action="{{ url_for('print_invoice', invoice_id=invoice.id) }}">
+        <label for="persona">Select Persona:</label>
+        <select name="persona" id="persona">
+            {% for key, persona in PERSONAS.items() %}
+                <option value="{{ key }}">{{ persona.first_name }} {{ persona.last_name }}</option>
+            {% endfor %}
+        </select>
+        <input type="hidden" name="language" value="{{ request.args.get('language', 'en') }}">
+        <button type="submit" class="btn btn-info">Update</button>
+    </form> -->
+
+    <p><strong>{{ persona_info.prefix }} {{ persona_info.first_name }} {{ persona_info.last_name }} {{ persona_info.suffix }}</strong></p>
+    <p>{{ persona_info.address.street }}</p>
+    <p>{{ persona_info.address.city }}, {{ persona_info.address.state }} {{ persona_info.address.postal_code }}</p>
+    <p>{{ persona_info.address.country }}</p>
+    <p>Tel: {{ persona_info.tel }}</p>
+    <p>Email: {{ persona_info.email }}</p>
+    <p>VAT Number: {{ persona_info.vat_number }}</p>
+    <p><strong>Bank Info:</strong></p>
+    <p>Bank Name: {{ persona_info.bank_info.bank_name }}</p>
+    <p>IBAN: {{ persona_info.bank_info.iban }}</p>
+    <p>BIC: {{ persona_info.bank_info.bic }}</p>
+
+
     <p>{{ language_dict['date'] }}: {{ invoice.invoice_date }}</p>
     <p>{{ language_dict['client'] }}: {{ invoice.client.company_name }}</p>
     <p>{{ language_dict['currency'] }}: {{ invoice.currency }}</p>
