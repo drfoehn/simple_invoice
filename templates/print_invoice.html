@@ -4,10 +4,24 @@
 {% block title %}{{ language_dict['invoice'] }} #{{ invoice.invoice_number }}{% endblock %}
 
 {% block content %}
+<style>
+    @media print {
+        body {
+            width: 210mm; /* A4 width */
+            height: 297mm; /* A4 height */
+            font-size: 12pt; /* Adjust font size for printing */
+            margin: 0; /* Remove default margin */
+            padding: 20mm; /* Add padding for print */
+        }
+        .no-print {
+            display: none; /* Hide elements with class 'no-print' when printing */
+        }
+    }
+</style>
+
 <div class="container mt-4">
     <h1>{{ language_dict['invoice'] }} #{{ invoice.invoice_number }}</h1>
-    
-    <!-- Persona Selection -->
+       <!-- Persona Selection -->
     <!--<form method="GET" action="{{ url_for('print_invoice', invoice_id=invoice.id) }}">
         <label for="persona">Select Persona:</label>
         <select name="persona" id="persona">
@@ -19,22 +33,18 @@
         <button type="submit" class="btn btn-info">Update</button>
     </form> -->
 
-    <p><strong>{{ persona_info.prefix }} {{ persona_info.first_name }} {{ persona_info.last_name }} {{ persona_info.suffix }}</strong></p>
-    <p>{{ persona_info.address.street }}</p>
-    <p>{{ persona_info.address.city }}, {{ persona_info.address.state }} {{ persona_info.address.postal_code }}</p>
-    <p>{{ persona_info.address.country }}</p>
-    <p>Tel: {{ persona_info.tel }}</p>
-    <p>Email: {{ persona_info.email }}</p>
-    <p>VAT Number: {{ persona_info.vat_number }}</p>
-    <p><strong>Bank Info:</strong></p>
-    <p>Bank Name: {{ persona_info.bank_info.bank_name }}</p>
-    <p>IBAN: {{ persona_info.bank_info.iban }}</p>
-    <p>BIC: {{ persona_info.bank_info.bic }}</p>
-
-
-    <p>{{ language_dict['date'] }}: {{ invoice.invoice_date }}</p>
-    <p>{{ language_dict['client'] }}: {{ invoice.client.company_name }}</p>
-    <p>{{ language_dict['currency'] }}: {{ invoice.currency }}</p>
+    
+    <!-- Persona Information -->
+    <div>
+        <p><strong>{{ persona_info.prefix }} {{ persona_info.first_name }} {{ persona_info.last_name }} {{ persona_info.suffix }}</strong></p>
+        <p>{{ persona_info.address.street }}</p>
+        <p>{{ persona_info.address.city }}, {{ persona_info.address.state }} {{ persona_info.address.postal_code }}</p>
+        <p>{{ persona_info.address.country }}</p>
+        <p>Tel: {{ persona_info.tel }}</p>
+        <p>Email: {{ persona_info.email }}</p>
+        <p>VAT Number: {{ persona_info.vat_number }}</p>
+        
+    </div>
 
     <h3>{{ language_dict['services'] }}</h3>
     <table class="table">
@@ -60,10 +70,48 @@
 
     <h3>{{ language_dict['summary'] }}</h3>
     <p>{{ language_dict['subtotal'] }}: {{ subtotal }} {{ invoice.currency }}</p>
+    {% if discount > 0 %}
     <p>{{ language_dict['discount'] }}: {{ discount }} %</p>
+    {% endif %}
     {% if vat_amount > 0 %}
     <p>{{ language_dict['vat'] }} ({{ invoice.vat_percentage }}%): {{ vat_amount }}</p>
     {% endif %}
     <h4>{{ language_dict['total'] }}: {{ total }} {{ invoice.currency }}</h4>
+
+
+
+    Terms: {{ client_payment_terms }}
+
+    <p><strong>Bank Info:</strong></p>
+        <p>Bank Name: {{ persona_info.bank_info.bank_name }}</p>
+        <p>IBAN: {{ persona_info.bank_info.iban }}</p>
+        <p>BIC: {{ persona_info.bank_info.bic }}</p>
+
+
+    <!-- Print and Download Buttons -->
+    <div class="mt-4 no-print">
+        <button class="btn btn-primary" onclick="window.print();">Print Invoice</button>
+        <button class="btn btn-success" id="downloadInvoice">Download Invoice as PDF</button>
+    </div>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    // JavaScript to handle the download functionality
+    document.getElementById('downloadInvoice').addEventListener('click', function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Get the content of the invoice
+        const invoiceContent = document.querySelector('.container').innerHTML;
+
+        // Add the content to the PDF
+        doc.fromHTML(invoiceContent, 15, 15, {
+            'width': 170
+        });
+
+        // Save the PDF
+        doc.save('invoice.pdf');
+    });
+</script>
 {% endblock %}

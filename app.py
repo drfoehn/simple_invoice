@@ -34,7 +34,7 @@ class Client(db.Model):
     phone = db.Column(db.String(20), nullable=True)
     currency = db.Column(db.String(10), nullable=True)  # Currency field
     language = db.Column(db.String(10), nullable=True)
-    payment_terms = db.Column(db.String(100), nullable=True)
+    payment_terms = db.Column(db.String(300), nullable=True)
     invoices = db.relationship('Invoice', backref='client', lazy=True)
 
 # Define the Invoice model
@@ -277,6 +277,9 @@ def print_invoice(invoice_id):
         invoice = Invoice.query.get_or_404(invoice_id)
         services = InvoiceService.query.filter_by(invoice_id=invoice.id).all()
         
+        # Fetch the client associated with the invoice
+        client = Client.query.get(invoice.client_id)  # Assuming invoice has a client_id field
+
         # Calculate subtotal and total
         subtotal = sum(service.line_total for service in services)
         discount = 0  # You can modify this if you want to include discount logic
@@ -301,12 +304,10 @@ def print_invoice(invoice_id):
                                total=total, 
                                language_dict=language_dict, 
                                persona_info=persona_info,
+                               client_payment_terms=client.payment_terms,  # Pass payment terms to the template
                                PERSONAS=PERSONAS)  # Include PERSONAS here
 
     elif request.method == 'POST':
-        # Handle POST request logic here if needed
-        # For example, you might want to handle printing or saving the invoice
-        # You can also redirect or render a different template if necessary
         return redirect(url_for('index'))  # Redirect to the index page or another appropriate action
 
 @app.route('/delete_client/<int:client_id>', methods=['POST'])
@@ -383,7 +384,7 @@ LANGUAGES = {
         'summary': 'Zusammenfassung',
         'subtotal': 'Zwischensumme',
         'discount': 'Rabatt',
-        'vat': 'MwSt',
+        'vat': 'USt',
         'total': 'Gesamt'
     }
 }
@@ -437,4 +438,3 @@ PERSONAS = {
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)
-
