@@ -18,10 +18,7 @@
         }
     }
 </style>
-
-<div class="container mt-4">
-    <h1>{{ language_dict['invoice'] }} #{{ invoice.invoice_number }}</h1>
-       <!-- Persona Selection -->
+ <!-- Persona Selection -->
     <!--<form method="GET" action="{{ url_for('print_invoice', invoice_id=invoice.id) }}">
         <label for="persona">Select Persona:</label>
         <select name="persona" id="persona">
@@ -32,22 +29,39 @@
         <input type="hidden" name="language" value="{{ request.args.get('language', 'en') }}">
         <button type="submit" class="btn btn-info">Update</button>
     </form> -->
-
-    
-    <!-- Persona Information -->
-    <div>
-        <p><strong>{{ persona_info.prefix }} {{ persona_info.first_name }} {{ persona_info.last_name }} {{ persona_info.suffix }}</strong></p>
-        <p>{{ persona_info.address.street }}</p>
-        <p>{{ persona_info.address.city }}, {{ persona_info.address.state }} {{ persona_info.address.postal_code }}</p>
-        <p>{{ persona_info.address.country }}</p>
-        <p>Tel: {{ persona_info.tel }}</p>
-        <p>Email: {{ persona_info.email }}</p>
-        <p>VAT Number: {{ persona_info.vat_number }}</p>
-        
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+    <h1 class="">{{ language_dict['invoice'] }} #{{ invoice.invoice_number }}</h1>
+        </div>
+        </div>
+        <div class="row">
+        <div class="col">
+            <h3>{{ language_dict['recipient'] }}:</h3>
+        </div>
+        </div>
+    <div class="row">
+        <div class="col-6">
+            <p><strong>{{ client.first_name }} {{ client.last_name }}</strong></p>
+            {{ client.street }}</br>
+            {{ client.city }}, {{ client.state }} {{ client.postal_code }}</br>
+            {{ client.country }}</br>
+            {{ language_dict['tel'] }}: {{ client.phone }}</br>
+            {{ language_dict['email'] }}: {{ client.email }}</br>
+            {{ language_dict['vat_number'] }}: {{ client.vat_number }}</br>
+        </div>    
+        <div class="col-6">
+            <p class="text-right"><strong>{{ language_dict['date'] }}:</strong> {{ invoice.invoice_date.strftime('%Y-%m-%d') }}</p>
+            <p class="text-right"><strong>{{ language_dict['invoice'] }} #:</strong> {{ invoice.invoice_number }}</p>
+        </div>
     </div>
 
+    
+
+    
+
     <h3>{{ language_dict['services'] }}</h3>
-    <table class="table">
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>{{ language_dict['service'] }}</th>
@@ -65,28 +79,60 @@
                 <td>{{ service.line_total }} {{ invoice.currency }}</td>
             </tr>
             {% endfor %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td><strong>{{ language_dict['subtotal'] }}</strong></td>
+                <td><strong>{{ subtotal }} {{ invoice.currency }}</strong></td>
+            </tr>
+            {% if discount > 0 %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td>{{ language_dict['discount'] }}</td>
+                <td>{{ discount }} %</td>
+            </tr>
+            {% endif %}
+            {% if vat_amount > 0 %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td>{{ language_dict['vat'] }} ({{ invoice.vat_percentage }}%)</td>
+                <td>{{ vat_amount }}</td>
+            </tr>
+            {% endif %}
         </tbody>
     </table>
 
-    <h3>{{ language_dict['summary'] }}</h3>
-    <p>{{ language_dict['subtotal'] }}: {{ subtotal }} {{ invoice.currency }}</p>
-    {% if discount > 0 %}
-    <p>{{ language_dict['discount'] }}: {{ discount }} %</p>
-    {% endif %}
-    {% if vat_amount > 0 %}
-    <p>{{ language_dict['vat'] }} ({{ invoice.vat_percentage }}%): {{ vat_amount }}</p>
-    {% endif %}
+    
     <h4>{{ language_dict['total'] }}: {{ total }} {{ invoice.currency }}</h4>
+    <div class="row">
+        <div class="col">
+            <strong>{{ language_dict['client_terms'] }}</strong>
+            <p>{{ client_payment_terms }}<p>
+            </div>
+            </div>
+    <p>{{ language_dict['transfer_text'] }}</p>
 
-
-
-    Terms: {{ client_payment_terms }}
-
-    <p><strong>Bank Info:</strong></p>
-        <p>Bank Name: {{ persona_info.bank_info.bank_name }}</p>
-        <p>IBAN: {{ persona_info.bank_info.iban }}</p>
-        <p>BIC: {{ persona_info.bank_info.bic }}</p>
-
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col">
+        <strong>{{ persona_info.prefix }} {{ persona_info.first_name }} {{ persona_info.last_name }} {{ persona_info.suffix }}</strong></br>
+        {{ persona_info.address.street }}</br>
+        {{ persona_info.address.city }}, {{ persona_info.address.state }} {{ persona_info.address.postal_code}}</br>
+        {{ persona_info.address.country }}</br>
+        {{ language_dict['tel'] }}: {{ persona_info.tel }}</br>
+        {{ language_dict['email'] }}: {{ persona_info.email }}</br>
+        {{ language_dict['vat_number'] }}: {{ persona_info.vat_number }}</br>
+    </div>
+    <div class="col">
+    <strong>{{ language_dict['bank_info'] }}</strong></br>
+    {{ persona_info.bank_info.account_holder }}</br>
+    Bank Name: {{ persona_info.bank_info.bank_name }}</br>
+    IBAN: {{ persona_info.bank_info.iban }}</br>
+    BIC: {{ persona_info.bank_info.bic }}</br>
+</div>
+</div>
 
     <!-- Print and Download Buttons -->
     <div class="mt-4 no-print">

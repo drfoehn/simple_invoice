@@ -113,7 +113,7 @@ def create_client():
         db.session.commit()
         return redirect(url_for('index'))
     
-    return render_template('edit_client.html', client=None, client_id=None)
+    return render_template('add_client.html', client=None, client_id=None)
 
 @app.route('/edit_client/<int:client_id>', methods=['GET', 'POST'])
 def edit_client(client_id):
@@ -141,11 +141,10 @@ def edit_client(client_id):
         logging.debug("Client updated successfully.")  # Debugging line
         return redirect(url_for('index'))
     
-    return render_template('edit_client.html', client=client, client_id=client_id)
+    return render_template('add_client.html', client=client, client_id=client_id)
 
 @app.route('/add_invoice', methods=['GET', 'POST'])
 def add_invoice():
-    #pdb.set_trace()  # Set a breakpoint here
     if request.method == 'POST':
         # Handle form submission
         invoice_id = request.form.get('invoice_id')  # Get the generated invoice ID
@@ -208,50 +207,68 @@ def add_invoice():
             vat_amount = total * (vat_percentage / 100)
             total += vat_amount  # Add VAT to total
 
-        # Create the invoice with the calculated total and invoice_id
-        new_invoice = Invoice(
-            id=invoice_id,
-            invoice_id=invoice_id,
-            invoice_number=invoice_number,
-            invoice_date=invoice_date,
-            client_id=client_id,
-            total=total,
-            state=state,
-            apply_vat=apply_vat,
-            vat_percentage=vat_percentage,
-            currency=currency  # Set the currency
-        )
+        # Check if editing an existing invoice
+        if invoice_id:
+            invoice = Invoice.query.get_or_404(invoice_id)
+            invoice.invoice_number = invoice_number
+            invoice.invoice_date = invoice_date
+            invoice.client_id = client_id
+            invoice.total = total
+            invoice.state = state
+            invoice.apply_vat = apply_vat
+            invoice.vat_percentage = vat_percentage
+            invoice.currency = currency
 
-        # Add the invoice and services to the session
-        db.session.add(new_invoice)
-        db.session.commit()  # Commit to save the invoice and get its ID
+            # Update services
+            InvoiceService.query.filter_by(invoice_id=invoice.id).delete()  # Remove old services
+            for service in services:
+                service.invoice_id = invoice.id  # Set the invoice_id for each service
+                db.session.add(service)
 
-        # Now that the invoice ID is available, set it for each service
-        for service in services:
-            service.invoice_id = new_invoice.id  # Set the invoice_id for each service
-            db.session.add(service)
+            db.session.commit()
+            flash("Invoice updated successfully!", "success")
+        else:
+            # Create a new invoice
+            new_invoice = Invoice(
+                invoice_number=invoice_number,
+                invoice_date=invoice_date,
+                client_id=client_id,
+                total=total,
+                state=state,
+                apply_vat=apply_vat,
+                vat_percentage=vat_percentage,
+                currency=currency
+            )
+            db.session.add(new_invoice)
+            db.session.commit()  # Commit to save the invoice and get its ID
 
-        # Commit all changes to the database
-        db.session.commit()
+            # Now that the invoice ID is available, set it for each service
+            for service in services:
+                service.invoice_id = new_invoice.id  # Set the invoice_id for each service
+                db.session.add(service)
 
-        flash("Invoice added successfully!", "success")
+            db.session.commit()
+            flash("Invoice added successfully!", "success")
+
         return redirect(url_for('index'))
 
     # Generate a unique invoice ID using the current date and time
     invoice_id = datetime.now().strftime("%Y%m%d%H%M%S")  # Format: YYYYMMDDHHMMSS
     clients = Client.query.all()
-    
+
     # Set default VAT percentage to 0 initially
     vat_percentage = 0  
 
-    # If a client is selected, fetch the VAT percentage
-    if request.args.get('client_id'):
-        selected_client = Client.query.get(request.args.get('client_id'))
-        if selected_client:
-            vat_percentage = selected_client.vat_percentage  # Get the VAT percentage from the selected client
-            logging.debug(f"VAT Percentage for client {selected_client.id}: {vat_percentage}")
+    # Check if an invoice_id is provided for editing
+    if request.args.get('invoice_id'):
+        invoice = Invoice.query.get(request.args.get('invoice_id'))
+        if invoice:
+            # If the invoice exists, set the VAT percentage based on the client
+            vat_percentage = invoice.vat_percentage
+            return render_template('add_invoice.html', clients=clients, invoice=invoice, vat_percentage=vat_percentage)
 
-    return render_template('add_invoice.html', clients=clients, invoice_id=invoice_id, vat_percentage=vat_percentage)
+    # For adding a new invoice, pass None for the invoice variable
+    return render_template('add_invoice.html', clients=clients, invoice=None, vat_percentage=vat_percentage)
 
 @app.route('/client_invoices/<int:client_id>')
 def client_invoices(client_id):
@@ -269,11 +286,7 @@ def print_invoice(invoice_id):
         language_dict = LANGUAGES.get(selected_language, LANGUAGES['en'])  # Fallback to English
         persona_info = PERSONAS.get(selected_persona, PERSONAS['persona1'])  # Get persona info
 
-        # Debugging: Print the selected language and dictionary
-        print(f"Selected Language: {selected_language}")
-        print(f"Selected Persona: {selected_persona}")
-        print(f"Persona Info: {persona_info}")
-
+        # Fetch the invoice and associated client
         invoice = Invoice.query.get_or_404(invoice_id)
         services = InvoiceService.query.filter_by(invoice_id=invoice.id).all()
         
@@ -282,7 +295,7 @@ def print_invoice(invoice_id):
 
         # Calculate subtotal and total
         subtotal = sum(service.line_total for service in services)
-        discount = 0  # You can modify this if you want to include discount logic
+        discount = 0
         total = subtotal - (subtotal * (discount / 100))
 
         # Check if VAT is applied
@@ -294,7 +307,7 @@ def print_invoice(invoice_id):
             vat_amount = total * (vat_percentage / 100)
             total += vat_amount  # Add VAT to total
 
-        # Pass PERSONAS to the template
+        # Pass all necessary data to the template
         return render_template('print_invoice.html', 
                                invoice=invoice, 
                                services=services, 
@@ -304,10 +317,14 @@ def print_invoice(invoice_id):
                                total=total, 
                                language_dict=language_dict, 
                                persona_info=persona_info,
+                               client=client,  # Pass the client information to the template
                                client_payment_terms=client.payment_terms,  # Pass payment terms to the template
                                PERSONAS=PERSONAS)  # Include PERSONAS here
 
     elif request.method == 'POST':
+        # Handle POST request logic here if needed
+        # For example, you might want to handle printing or saving the invoice
+        # You can also redirect or render a different template if necessary
         return redirect(url_for('index'))  # Redirect to the index page or another appropriate action
 
 @app.route('/delete_client/<int:client_id>', methods=['POST'])
@@ -332,12 +349,33 @@ def delete_invoice(invoice_id):
     flash("Invoice deleted successfully!", "success")
     return redirect(url_for('index'))  # Redirect back to the invoices list
 
+@app.route('/edit_invoice/<int:invoice_id>', methods=['GET', 'POST'])
+def edit_invoice(invoice_id):
+    invoice = Invoice.query.get_or_404(invoice_id)
+
+    if request.method == 'POST':
+        # Update invoice details from the form
+        invoice.invoice_date = request.form['invoice_date']
+        invoice.total = request.form['total']
+        invoice.state = request.form['state']
+        # Add any other fields you want to edit
+
+        db.session.commit()
+        flash('Invoice updated successfully!', 'success')
+        return redirect(url_for('index'))
+
+    return render_template('edit_invoice.html', invoice=invoice)
+
 # Language dictionaries
 LANGUAGES = {
     'en': {
         'invoice': 'Invoice',
         'date': 'Date',
         'client': 'Client',
+        'recipient': 'Recipient',
+        'tel': 'Phone',
+        'email': 'e-mail',
+        'vat_number': 'VAT #',
         'currency': 'Currency',
         'services': 'Services',
         'service': 'Service',
@@ -353,12 +391,19 @@ LANGUAGES = {
         'vat_amount': 'VAT Amount:',
         'final_total': 'Final Total:',
         'client_name': 'Client Name:',
+        'client_terms': 'Terms of Payment',
         'invoice_date': 'Invoice Date:',
+        'transfer_text': 'Please transfer the amount on the bank account indicated below',
+        'bank_info': 'Account Inormation',
     },
     'fr': {
         'invoice': 'Facture',
         'date': 'Date',
         'client': 'Client',
+        'recipient': '----',
+        'tel': '---',
+        'email': '---',
+        'vat_number': '---',
         'currency': 'Devise',
         'services': 'Services',
         'service': 'Service',
@@ -369,12 +414,20 @@ LANGUAGES = {
         'subtotal': 'Sous-total',
         'discount': 'Remise',
         'vat': 'TVA',
-        'total': 'Total'
+        'total': 'Total',
+        'transfer_text': '',
+        'bank_info': '-----',
+        'client_terms': '------',
     },
     'de': {
         'invoice': 'Rechnung',
         'date': 'Datum',
         'client': 'Kunde',
+        'recipient': 'Empfänger',
+        'tel': 'Tel.',
+        'email': 'E-mail',
+        'vat_number': 'USt-ID',
+        'recipient': 'Empfänger',
         'currency': 'Währung',
         'services': 'Dienstleistungen',
         'service': 'Dienstleistung',
@@ -385,7 +438,10 @@ LANGUAGES = {
         'subtotal': 'Zwischensumme',
         'discount': 'Rabatt',
         'vat': 'USt',
-        'total': 'Gesamt'
+        'total': 'Gesamt',
+        'transfer_text': 'Bitte überweisen Sie die Summe auf das unten angegebene Konto',
+        'bank_info': 'Konto-Information',
+        'client_terms': 'Zahlungsbedingungen',
     }
 }
 
@@ -407,6 +463,7 @@ PERSONAS = {
         'email': 'john.doe@example.com',
         'vat_number': 'US123456789',
         'bank_info': {
+            'account_holder': 'John Doe',
             'bank_name': 'Bank of America',
             'iban': 'US12345678901234567890',
             'bic': 'BOFAUS3N'
@@ -428,6 +485,7 @@ PERSONAS = {
         'email': 'jane.smith@example.com',
         'vat_number': 'US987654321',
         'bank_info': {
+            'account_holder': 'Jane Smith',
             'bank_name': 'Chase Bank',
             'iban': 'US09876543210987654321',
             'bic': 'CHASUS33'
@@ -438,3 +496,4 @@ PERSONAS = {
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)
+

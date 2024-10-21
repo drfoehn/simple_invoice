@@ -1,21 +1,21 @@
 <!-- templates/add_invoice.html -->
 {% extends "base.html" %}
 
-{% block title %}Add Invoice - Invoicing App{% endblock %}
+{% block title %}{{ 'Edit Invoice' if invoice else 'Add Invoice' }} - Invoicing App{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h1>Add Invoice</h1>
+    <h1>{{ 'Edit Invoice' if invoice else 'Add Invoice' }}</h1>
     <form method="POST" action="{{ url_for('add_invoice') }}" id="invoice-form">
         <div class="form-group">
             <label for="invoice_id">Invoice ID</label>
-            <input type="text" class="form-control" id="invoice_id" name="invoice_id" value="{{ invoice_id }}" readonly>
+            <input type="text" class="form-control" id="invoice_id" name="invoice_id" value="{{ invoice.id if invoice else invoice_id }}" readonly>
         </div>
         <div class="form-group">
             <label for="client_id">Client</label>
             <select class="form-control" name="client_id" id="client_id" required>
                 {% for client in clients %}
-                    <option value="{{ client.id }}" data-vat="{{ client.vat_percentage }}" data-currency="{{ client.currency }}">
+                    <option value="{{ client.id }}" data-vat="{{ client.vat_percentage }}" data-currency="{{ client.currency }}" {% if invoice and invoice.client_id == client.id %}selected{% endif %}>
                         {{ client.company_name }} - {{ client.first_name }} {{ client.last_name }}
                     </option>
                 {% endfor %}
@@ -23,41 +23,43 @@
         </div>
         <div class="form-group">
             <label for="invoice_number">Invoice Number</label>
-            <input type="text" class="form-control" id="invoice_number" name="invoice_number" required>
+            <input type="text" class="form-control" id="invoice_number" name="invoice_number" value="{{ invoice.invoice_number if invoice else '' }}" required>
         </div>
         <div class="form-group">
             <label for="invoice_date">Invoice Date</label>
-            <input type="date" class="form-control" id="invoice_date" name="invoice_date" required>
+            <input type="date" class="form-control" id="invoice_date" name="invoice_date" value="{{ invoice.invoice_date.strftime('%Y-%m-%d') if invoice else '' }}" required>
         </div>
         <div class="form-group">
             <label for="state">Invoice State</label>
             <select class="form-control" name="state" required>
-                <option value="Draft">Draft</option>
-                <option value="Sent">Sent</option>
-                <option value="Paid">Paid</option>
+                <option value="Draft" {% if invoice and invoice.state == 'Draft' %}selected{% endif %}>Draft</option>
+                <option value="Sent" {% if invoice and invoice.state == 'Sent' %}selected{% endif %}>Sent</option>
+                <option value="Paid" {% if invoice and invoice.state == 'Paid' %}selected{% endif %}>Paid</option>
             </select>
         </div>
 
         <h3>Services</h3>
         <div id="services-container">
+            {% for service in invoice.services if invoice %}
             <div class="service-line">
                 <div class="form-group">
-                    <label for="service_0">Service</label>
-                    <input type="text" class="form-control" name="service_0" required>
+                    <label for="service_{{ loop.index0 }}">Service</label>
+                    <input type="text" class="form-control" name="service_{{ loop.index0 }}" value="{{ service.service }}" required>
                 </div>
                 <div class="form-group">
-                    <label for="unit_cost_0">Unit Cost</label>
-                    <input type="number" class="form-control" name="unit_cost_0" step="0.01" required>
+                    <label for="unit_cost_{{ loop.index0 }}">Unit Cost</label>
+                    <input type="number" class="form-control" name="unit_cost_{{ loop.index0 }}" step="0.01" value="{{ service.unit_cost }}" required>
                 </div>
                 <div class="form-group">
-                    <label for="quantity_0">Quantity</label>
-                    <input type="number" class="form-control" name="quantity_0" required>
+                    <label for="quantity_{{ loop.index0 }}">Quantity</label>
+                    <input type="number" class="form-control" name="quantity_{{ loop.index0 }}" value="{{ service.quantity }}" required>
                 </div>
                 <div class="form-group">
-                    <label for="line_total_0">Line Total</label>
-                    <input type="number" class="form-control" name="line_total_0" readonly>
+                    <label for="line_total_{{ loop.index0 }}">Line Total</label>
+                    <input type="number" class="form-control" name="line_total_{{ loop.index0 }}" value="{{ service.line_total }}" readonly>
                 </div>
             </div>
+            {% endfor %}
         </div>
         <button type="button" class="btn btn-secondary" id="add-service">Add Another Service</button>
 
@@ -74,7 +76,7 @@
             <label for="vat">Apply VAT (%)</label>
             <input type="checkbox" id="apply_vat" name="apply_vat">
             <input type="number" class="form-control" id="vat_percentage" name="vat_percentage" value="{{ vat_percentage }}" disabled>
-            <button type="button" class="btn btn-info" id="fetch_vat">Fetch Client VAT</button> <!-- Button to fetch VAT -->
+            <button type="button" class="btn btn-info" id="fetch_vat">Fetch Client VAT</button>
         </div>
         <div class="form-group">
             <label for="total">Total</label>
@@ -82,11 +84,11 @@
         </div>
         <div class="form-group">
             <label for="currency">Currency</label>
-            <input type="text" class="form-control" id="currency" name="currency" value="{{ currency }}" readonly>
+            <input type="text" class="form-control" id="currency" name="currency" value="{{ invoice.currency if invoice else '' }}" readonly>
             <button type="button" class="btn btn-info" id="fetch_currency">Fetch Client Currency</button>
         </div>
-        <input type="hidden" name="line_count" id="line_count" value="1">
-        <button type="submit" class="btn btn-primary">Create Invoice</button>
+        <input type="hidden" name="line_count" id="line_count" value="{{ invoice.services|length if invoice else 1 }}">
+        <button type="submit" class="btn btn-primary">{{ 'Update Invoice' if invoice else 'Create Invoice' }}</button>
     </form>
 </div>
 
