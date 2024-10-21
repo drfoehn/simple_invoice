@@ -68,10 +68,10 @@ with app.app_context():
 # Define the routes
 @app.route('/')
 def index():
-    # Example of setting a session variable
+
     clients = Client.query.all()
     invoices = Invoice.query.all()  # Fetch all invoices
-    return render_template('index.html', clients=clients, invoices=invoices)
+    return render_template('index.html', clients=clients, invoices=invoices, PERSONAS=PERSONAS)  # Pass PERSONAS here
 
 
 @app.route('/create_client', methods=['POST', 'GET'])
@@ -264,11 +264,15 @@ def print_invoice(invoice_id):
     if request.method == 'GET':
         # Get the selected language from the query parameters
         selected_language = request.args.get('language', 'en')  # Default to English if not provided
+        selected_persona = request.args.get('persona', 'persona1')  # Default to the first persona
+
         language_dict = LANGUAGES.get(selected_language, LANGUAGES['en'])  # Fallback to English
+        persona_info = PERSONAS.get(selected_persona, PERSONAS['persona1'])  # Get persona info
 
         # Debugging: Print the selected language and dictionary
         print(f"Selected Language: {selected_language}")
-        print(f"Language Dictionary: {language_dict}")
+        print(f"Selected Persona: {selected_persona}")
+        print(f"Persona Info: {persona_info}")
 
         invoice = Invoice.query.get_or_404(invoice_id)
         services = InvoiceService.query.filter_by(invoice_id=invoice.id).all()
@@ -287,7 +291,17 @@ def print_invoice(invoice_id):
             vat_amount = total * (vat_percentage / 100)
             total += vat_amount  # Add VAT to total
 
-        return render_template('print_invoice.html', invoice=invoice, services=services, subtotal=subtotal, discount=discount, vat_amount=vat_amount, total=total, language_dict=language_dict)
+        # Pass PERSONAS to the template
+        return render_template('print_invoice.html', 
+                               invoice=invoice, 
+                               services=services, 
+                               subtotal=subtotal, 
+                               discount=discount, 
+                               vat_amount=vat_amount, 
+                               total=total, 
+                               language_dict=language_dict, 
+                               persona_info=persona_info,
+                               PERSONAS=PERSONAS)  # Include PERSONAS here
 
     elif request.method == 'POST':
         # Handle POST request logic here if needed
@@ -374,5 +388,53 @@ LANGUAGES = {
     }
 }
 
+# Define personas
+PERSONAS = {
+    'persona1': {
+        'prefix': 'Mr.',
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'suffix': 'Jr.',
+        'address': {
+            'street': '123 Main St',
+            'city': 'Anytown',
+            'postal_code': '12345',
+            'state': 'CA',
+            'country': 'USA'
+        },
+        'tel': '123-456-7890',
+        'email': 'john.doe@example.com',
+        'vat_number': 'US123456789',
+        'bank_info': {
+            'bank_name': 'Bank of America',
+            'iban': 'US12345678901234567890',
+            'bic': 'BOFAUS3N'
+        }
+    },
+    'persona2': {
+        'prefix': 'Ms.',
+        'first_name': 'Jane',
+        'last_name': 'Smith',
+        'suffix': '',
+        'address': {
+            'street': '456 Elm St',
+            'city': 'Othertown',
+            'postal_code': '67890',
+            'state': 'NY',
+            'country': 'USA'
+        },
+        'tel': '987-654-3210',
+        'email': 'jane.smith@example.com',
+        'vat_number': 'US987654321',
+        'bank_info': {
+            'bank_name': 'Chase Bank',
+            'iban': 'US09876543210987654321',
+            'bic': 'CHASUS33'
+        }
+    }
+    # Add more personas as needed
+}
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)
+
