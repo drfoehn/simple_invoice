@@ -207,68 +207,38 @@ def add_invoice():
             vat_amount = total * (vat_percentage / 100)
             total += vat_amount  # Add VAT to total
 
-        # Check if editing an existing invoice
-        if invoice_id:
-            invoice = Invoice.query.get_or_404(invoice_id)
-            invoice.invoice_number = invoice_number
-            invoice.invoice_date = invoice_date
-            invoice.client_id = client_id
-            invoice.total = total
-            invoice.state = state
-            invoice.apply_vat = apply_vat
-            invoice.vat_percentage = vat_percentage
-            invoice.currency = currency
+        # Create a new invoice
+        new_invoice = Invoice(
+            invoice_id=invoice_id,  # Use the provided invoice_id
+            invoice_number=invoice_number,
+            invoice_date=invoice_date,
+            client_id=client_id,
+            total=total,
+            state=state,
+            apply_vat=apply_vat,
+            vat_percentage=vat_percentage,
+            currency=currency
+        )
+        db.session.add(new_invoice)
+        db.session.commit()  # Commit to save the invoice and get its ID
 
-            # Update services
-            InvoiceService.query.filter_by(invoice_id=invoice.id).delete()  # Remove old services
-            for service in services:
-                service.invoice_id = invoice.id  # Set the invoice_id for each service
-                db.session.add(service)
+        # Now that the invoice ID is available, set it for each service
+        for service in services:
+            service.invoice_id = new_invoice.id  # Set the invoice_id for each service
+            db.session.add(service)
 
-            db.session.commit()
-            flash("Invoice updated successfully!", "success")
-        else:
-            # Create a new invoice
-            new_invoice = Invoice(
-                invoice_number=invoice_number,
-                invoice_date=invoice_date,
-                client_id=client_id,
-                total=total,
-                state=state,
-                apply_vat=apply_vat,
-                vat_percentage=vat_percentage,
-                currency=currency
-            )
-            db.session.add(new_invoice)
-            db.session.commit()  # Commit to save the invoice and get its ID
-
-            # Now that the invoice ID is available, set it for each service
-            for service in services:
-                service.invoice_id = new_invoice.id  # Set the invoice_id for each service
-                db.session.add(service)
-
-            db.session.commit()
-            flash("Invoice added successfully!", "success")
-
+        db.session.commit()
+        flash("Invoice added successfully!", "success")
         return redirect(url_for('index'))
 
-    # Generate a unique invoice ID using the current date and time
-    invoice_id = datetime.now().strftime("%Y%m%d%H%M%S")  # Format: YYYYMMDDHHMMSS
+    # For adding a new invoice, generate a unique invoice ID
+    invoice_id = datetime.now().strftime("%Y%m%d%H%M%S")  # Generate a unique invoice ID
+    logging.debug(f"Generated Invoice ID: {invoice_id}")
     clients = Client.query.all()
 
     # Set default VAT percentage to 0 initially
     vat_percentage = 0  
-
-    # Check if an invoice_id is provided for editing
-    if request.args.get('invoice_id'):
-        invoice = Invoice.query.get(request.args.get('invoice_id'))
-        if invoice:
-            # If the invoice exists, set the VAT percentage based on the client
-            vat_percentage = invoice.vat_percentage
-            return render_template('add_invoice.html', clients=clients, invoice=invoice, vat_percentage=vat_percentage)
-
-    # For adding a new invoice, pass None for the invoice variable
-    return render_template('add_invoice.html', clients=clients, invoice=None, vat_percentage=vat_percentage)
+    return render_template('add_invoice.html', clients=clients, invoice=None, vat_percentage=vat_percentage, invoice_id=invoice_id)
 
 @app.route('/client_invoices/<int:client_id>')
 def client_invoices(client_id):
@@ -351,20 +321,54 @@ def delete_invoice(invoice_id):
 
 @app.route('/edit_invoice/<int:invoice_id>', methods=['GET', 'POST'])
 def edit_invoice(invoice_id):
-    invoice = Invoice.query.get_or_404(invoice_id)
-
+    invoice = Invoice.query.get_or_404(invoice_id)  # Fetch the invoice by ID
+    logging.debug(f"fetched Invoice ID: {invoice_id}")
     if request.method == 'POST':
-        # Update invoice details from the form
-        invoice.invoice_date = request.form['invoice_date']
-        invoice.total = request.form['total']
-        invoice.state = request.form['state']
-        # Add any other fields you want to edit
+        # Handle form submission
+        invoice_number = request.form.get('invoice_number')
+        invoice_date_str = request.form.get('invoice_date')
+        client_id = request.form.get('client_id')
+        state = request.form.get('state')
+        discount = float(request.form.get('discount', 0))
+        apply_vat = request.form.get('apply_vat') == 'on'
+        vat_percentage = float(request.form.get('vat_percentage', 0))
+        currency = request.form.get('currency')  # Get currency
 
-        db.session.commit()
-        flash('Invoice updated successfully!', 'success')
+        # Update invoice fields
+        invoice.invoice_number = invoice_number
+        invoice.invoice_date = datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
+        invoice.client_id = client_id
+        invoice.state = state
+        invoice.discount = discount
+        invoice.apply_vat = apply_vat
+        invoice.vat_percentage = vat_percentage
+        invoice.currency = currency
+
+        # Clear existing services and add updated ones
+        InvoiceService.query.filter_by(invoice_id=invoice.id).delete()  # Clear existing services
+        line_count = int(request.form.get('line_count', 0))
+        for i in range(line_count):
+            service = request.form.get(f'service_{i}')
+            unit_cost = request.form.get(f'unit_cost_{i}')
+            quantity = request.form.get(f'quantity_{i}')
+
+            # Create a new service entry
+            new_service = InvoiceService(
+                invoice_id=invoice.id,
+                service=service,
+                unit_cost=float(unit_cost),
+                quantity=int(quantity),
+                line_total=float(unit_cost) * int(quantity)
+            )
+            db.session.add(new_service)
+
+        db.session.commit()  # Commit changes to the database
+        flash("Invoice updated successfully!", "success")
         return redirect(url_for('index'))
 
-    return render_template('edit_invoice.html', invoice=invoice)
+    # For editing an existing invoice, pass the invoice data to the template
+    clients = Client.query.all()  # Fetch all clients for the dropdown
+    return render_template('add_invoice.html', clients=clients, invoice=invoice)
 
 # Language dictionaries
 LANGUAGES = {

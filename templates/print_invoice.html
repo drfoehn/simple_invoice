@@ -4,21 +4,7 @@
 {% block title %}{{ language_dict['invoice'] }} #{{ invoice.invoice_number }}{% endblock %}
 
 {% block content %}
-<style>
-    @media print {
-        body {
-            width: 210mm; /* A4 width */
-            height: 297mm; /* A4 height */
-            font-size: 12pt; /* Adjust font size for printing */
-            margin: 0; /* Remove default margin */
-            padding: 20mm; /* Add padding for print */
-        }
-        .no-print {
-            display: none; /* Hide elements with class 'no-print' when printing */
-        }
-    }
-</style>
- <!-- Persona Selection -->
+<!-- Persona Selection -->
     <!--<form method="GET" action="{{ url_for('print_invoice', invoice_id=invoice.id) }}">
         <label for="persona">Select Persona:</label>
         <select name="persona" id="persona">
@@ -32,15 +18,18 @@
 <div class="container mt-4">
     <div class="row">
         <div class="col">
-    <h1 class="">{{ language_dict['invoice'] }} #{{ invoice.invoice_number }}</h1>
+    <h1 class="invoice_title">{{ language_dict['invoice'] }} #{{ invoice.invoice_number }}</h1>
         </div>
+        <div class="col">
+        <img src="{{ persona_info.logo }}" alt="Logo" class="logo"> <!-- Logo based on persona -->
         </div>
+    </div>
         <div class="row">
         <div class="col">
             <h3>{{ language_dict['recipient'] }}:</h3>
         </div>
         </div>
-    <div class="row">
+    <div class="row client_details">
         <div class="col-6">
             <p><strong>{{ client.first_name }} {{ client.last_name }}</strong></p>
             {{ client.street }}</br>
@@ -50,9 +39,9 @@
             {{ language_dict['email'] }}: {{ client.email }}</br>
             {{ language_dict['vat_number'] }}: {{ client.vat_number }}</br>
         </div>    
-        <div class="col-6">
-            <p class="text-right"><strong>{{ language_dict['date'] }}:</strong> {{ invoice.invoice_date.strftime('%Y-%m-%d') }}</p>
-            <p class="text-right"><strong>{{ language_dict['invoice'] }} #:</strong> {{ invoice.invoice_number }}</p>
+        <div class="col-6 ">
+            <p class="text-right">{{ persona_info.address.city }}, {{ invoice.invoice_date.strftime('%Y-%m-%d') }}</p>
+            
         </div>
     </div>
 
@@ -60,7 +49,7 @@
 
     
 
-    <h3>{{ language_dict['services'] }}</h3>
+    <h3 class="invocie_sevices_title">{{ language_dict['services'] }}</h3>
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -105,18 +94,22 @@
     </table>
 
     
-    <h4>{{ language_dict['total'] }}: {{ total }} {{ invoice.currency }}</h4>
+    <h4 class="invoice_total text-right">{{ language_dict['total'] }}: {{ total }} {{ invoice.currency }}</h4>
     <div class="row">
         <div class="col">
             <strong>{{ language_dict['client_terms'] }}</strong>
             <p>{{ client_payment_terms }}<p>
             </div>
             </div>
-    <p>{{ language_dict['transfer_text'] }}</p>
+            <div class="row">
+                <div class="col">
+    {{ language_dict['transfer_text'] }}
+    </div>
+</div>
 
-    <div class="container mt-4">
+    <div class="container mt-4 invoice_footer">
         <div class="row">
-            <div class="col">
+            <div class="col invoice_persona_info">
         <strong>{{ persona_info.prefix }} {{ persona_info.first_name }} {{ persona_info.last_name }} {{ persona_info.suffix }}</strong></br>
         {{ persona_info.address.street }}</br>
         {{ persona_info.address.city }}, {{ persona_info.address.state }} {{ persona_info.address.postal_code}}</br>
@@ -125,7 +118,7 @@
         {{ language_dict['email'] }}: {{ persona_info.email }}</br>
         {{ language_dict['vat_number'] }}: {{ persona_info.vat_number }}</br>
     </div>
-    <div class="col">
+    <div class="col invoice_bank_info">
     <strong>{{ language_dict['bank_info'] }}</strong></br>
     {{ persona_info.bank_info.account_holder }}</br>
     Bank Name: {{ persona_info.bank_info.bank_name }}</br>

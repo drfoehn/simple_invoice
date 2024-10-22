@@ -1,0 +1,31 @@
+/* static/styles.css */
+
+@media print {
+    body {
+        width: 210mm; /* A4 width */
+        height: 297mm; /* A4 height */
+        font-size: 12pt; /* Adjust font size for printing */
+        margin: 0; /* Remove default margin */
+        padding: 20mm; /* Add padding for print */
+    }
+    .no-print {
+        display: none; /* Hide elements with class 'no-print' when printing */
+    }
+}
+
+.logo {
+    position: absolute;
+    top: 5mm; /* Adjust as needed */
+    right: 20mm; /* Adjust as needed */
+    max-width: 100px; /* Adjust size as needed */
+}
+
+.invoice_title,
+.client_details,
+.invoice_total{
+    padding-bottom: 2em;
+}
+
+.invoice_footer{
+    background-color: #f3f4f5;
+}
