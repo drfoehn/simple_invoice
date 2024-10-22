@@ -6,10 +6,10 @@
 {% block content %}
 <div class="container mt-4">
     <h1>{{ 'Edit Invoice' if invoice else 'Add Invoice' }}</h1>
-    <form method="POST" action="{{ url_for('add_invoice') }}" id="invoice-form">
+    <form method="POST" action="{{ url_for('edit_invoice', invoice_id=invoice.id) if invoice else url_for('add_invoice') }}" id="invoice-form">
         <div class="form-group">
             <label for="invoice_id">Invoice ID</label>
-            <input type="text" class="form-control" id="invoice_id" name="invoice_id" value="{{ invoice.id if invoice else invoice_id }}" readonly>
+            <input type="text" class="form-control" id="invoice_id" name="invoice_id" value="{{ invoice_id }}" readonly>
         </div>
         <div class="form-group">
             <label for="client_id">Client</label>
@@ -40,26 +40,47 @@
 
         <h3>Services</h3>
         <div id="services-container">
-            {% for service in invoice.services if invoice %}
-            <div class="service-line">
-                <div class="form-group">
-                    <label for="service_{{ loop.index0 }}">Service</label>
-                    <input type="text" class="form-control" name="service_{{ loop.index0 }}" value="{{ service.service }}" required>
+            {% if invoice %}
+                {% for service in invoice.services %}
+                <div class="service-line">
+                    <div class="form-group">
+                        <label for="service_{{ loop.index0 }}">Service</label>
+                        <input type="text" class="form-control" name="service_{{ loop.index0 }}" value="{{ service.service }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="unit_cost_{{ loop.index0 }}">Unit Cost</label>
+                        <input type="number" class="form-control" name="unit_cost_{{ loop.index0 }}" step="0.01" value="{{ service.unit_cost }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity_{{ loop.index0 }}">Quantity</label>
+                        <input type="number" class="form-control" name="quantity_{{ loop.index0 }}" value="{{ service.quantity }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="line_total_{{ loop.index0 }}">Line Total</label>
+                        <input type="number" class="form-control" name="line_total_{{ loop.index0 }}" value="{{ service.line_total }}" readonly>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="unit_cost_{{ loop.index0 }}">Unit Cost</label>
-                    <input type="number" class="form-control" name="unit_cost_{{ loop.index0 }}" step="0.01" value="{{ service.unit_cost }}" required>
+                {% endfor %}
+            {% else %}
+                <div class="service-line">
+                    <div class="form-group">
+                        <label for="service_0">Service</label>
+                        <input type="text" class="form-control" name="service_0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="unit_cost_0">Unit Cost</label>
+                        <input type="number" class="form-control" name="unit_cost_0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity_0">Quantity</label>
+                        <input type="number" class="form-control" name="quantity_0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="line_total_0">Line Total</label>
+                        <input type="number" class="form-control" name="line_total_0" readonly>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="quantity_{{ loop.index0 }}">Quantity</label>
-                    <input type="number" class="form-control" name="quantity_{{ loop.index0 }}" value="{{ service.quantity }}" required>
-                </div>
-                <div class="form-group">
-                    <label for="line_total_{{ loop.index0 }}">Line Total</label>
-                    <input type="number" class="form-control" name="line_total_{{ loop.index0 }}" value="{{ service.line_total }}" readonly>
-                </div>
-            </div>
-            {% endfor %}
+            {% endif %}
         </div>
         <button type="button" class="btn btn-secondary" id="add-service">Add Another Service</button>
 
@@ -74,8 +95,8 @@
         </div>
         <div class="form-group">
             <label for="vat">Apply VAT (%)</label>
-            <input type="checkbox" id="apply_vat" name="apply_vat">
-            <input type="number" class="form-control" id="vat_percentage" name="vat_percentage" value="{{ vat_percentage }}" disabled>
+            <input type="checkbox" id="apply_vat" name="apply_vat" {% if invoice and invoice.apply_vat %}checked{% endif %}>
+            <input type="number" class="form-control" id="vat_percentage" name="vat_percentage" value="{{ invoice.vat_percentage if invoice else 0 }}" disabled>
             <button type="button" class="btn btn-info" id="fetch_vat">Fetch Client VAT</button>
         </div>
         <div class="form-group">
@@ -93,7 +114,42 @@
 </div>
 
 <script>
-    let lineCount = 1;
+    let lineCount = {{ invoice.services|length if invoice else 1 }};
+
+    // Function to calculate totals
+    function calculateTotals() {
+        let subtotal = 0;
+        for (let i = 0; i < lineCount; i++) {
+            const unitCost = parseFloat(document.querySelector(`input[name="unit_cost_${i}"]`)?.value) || 0;
+            const quantity = parseInt(document.querySelector(`input[name="quantity_${i}"]`)?.value) || 0;
+            const lineTotal = unitCost * quantity;
+            document.querySelector(`input[name="line_total_${i}"]`).value = lineTotal;
+            subtotal += lineTotal;
+        }
+        document.getElementById('subtotal').value = subtotal;
+
+        const discount = parseFloat(document.getElementById('discount').value) || 0;
+        const total = subtotal - (subtotal * (discount / 100));
+
+        // Check if VAT should be applied
+        const applyVAT = document.getElementById('apply_vat').checked;
+        const vatPercentage = parseFloat(document.getElementById('vat_percentage').value) || 0;
+
+        if (applyVAT) {
+            const vatAmount = (total * (vatPercentage / 100));
+            document.getElementById('total').value = total + vatAmount; // Add VAT to total
+        } else {
+            document.getElementById('total').value = total; // No VAT
+        }
+    }
+
+    // Initial calculation on page load
+    calculateTotals();
+
+    // Event listeners for input changes
+    document.getElementById('invoice-form').addEventListener('input', function() {
+        calculateTotals();
+    });
 
     document.getElementById('add-service').addEventListener('click', function() {
         const container = document.getElementById('services-container');
@@ -122,38 +178,6 @@
         document.getElementById('line_count').value = lineCount;
     });
 
-    document.getElementById('client_id').addEventListener('change', function() {
-        const selectedClientId = this.value;
-        // Redirect to the add_invoice route with the selected client ID
-        window.location.href = `{{ url_for('add_invoice') }}?client_id=${selectedClientId}`;
-    });
-
-    document.getElementById('invoice-form').addEventListener('input', function() {
-        let subtotal = 0;
-        for (let i = 0; i < lineCount; i++) {
-            const unitCost = parseFloat(document.querySelector(`input[name="unit_cost_${i}"]`)?.value) || 0;
-            const quantity = parseInt(document.querySelector(`input[name="quantity_${i}"]`)?.value) || 0;
-            const lineTotal = unitCost * quantity;
-            document.querySelector(`input[name="line_total_${i}"]`).value = lineTotal;
-            subtotal += lineTotal;
-        }
-        document.getElementById('subtotal').value = subtotal;
-
-        const discount = parseFloat(document.getElementById('discount').value) || 0;
-        const total = subtotal - (subtotal * (discount / 100));
-
-        // Check if VAT should be applied
-        const applyVAT = document.getElementById('apply_vat').checked;
-        const vatPercentage = parseFloat(document.getElementById('vat_percentage').value) || 0;
-
-        if (applyVAT) {
-            const vatAmount = (total * (vatPercentage / 100));
-            document.getElementById('total').value = total + vatAmount; // Add VAT to total
-        } else {
-            document.getElementById('total').value = total; // No VAT
-        }
-    });
-
     // Enable VAT percentage input when checkbox is checked
     document.getElementById('apply_vat').addEventListener('change', function() {
         document.getElementById('vat_percentage').disabled = !this.checked;
@@ -171,7 +195,5 @@
         document.getElementById('currency').value = currency; // Set currency based on selected client
     });
 </script>
-
-
 
 {% endblock %}
