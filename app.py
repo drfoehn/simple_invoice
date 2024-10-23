@@ -1,14 +1,15 @@
 # app.py
-from flask import Flask, render_template, request, redirect, session, url_for, flash
+from flask import Flask, render_template, request, redirect, session, url_for, flash, make_response
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import logging
 import pdb
+import json
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')  
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///invoicing.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -16,6 +17,22 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'your_secret_key_here'  # Replace with a strong secret key
 
 db = SQLAlchemy(app)
+
+# Load persona information
+try:
+    with open('personas.json', encoding='utf-8') as f:
+        PERSONAS = json.load(f)
+except json.JSONDecodeError as e:
+    logging.error(f"Error loading personas.json: {e}")
+    PERSONAS = {}
+
+# Load translations
+try:
+    with open('translations.json', encoding='utf-8') as f:
+        LANGUAGES = json.load(f)
+except json.JSONDecodeError as e:
+    logging.error(f"Error loading translations.json: {e}")
+    LANGUAGES = {}
 
 # Define the Client model
 class Client(db.Model):
@@ -63,16 +80,14 @@ class InvoiceService(db.Model):
 with app.app_context():
     db.create_all()
 
-
-
 # Define the routes
 @app.route('/')
 def index():
-
     clients = Client.query.all()
     invoices = Invoice.query.all()  # Fetch all invoices
-    return render_template('index.html', clients=clients, invoices=invoices, PERSONAS=PERSONAS)  # Pass PERSONAS here
-
+    response = make_response(render_template('index.html', clients=clients, invoices=invoices, PERSONAS=PERSONAS, LANGUAGES=LANGUAGES))
+    response.headers['Content-Type'] = 'text/html; charset=utf-8'
+    return response
 
 @app.route('/create_client', methods=['POST', 'GET'])
 def create_client():
@@ -370,133 +385,9 @@ def edit_invoice(invoice_id):
     clients = Client.query.all()  # Fetch all clients for the dropdown
     return render_template('add_invoice.html', clients=clients, invoice=invoice)
 
-# Language dictionaries
-LANGUAGES = {
-    'en': {
-        'invoice': 'Invoice',
-        'date': 'Date',
-        'client': 'Client',
-        'recipient': 'Recipient',
-        'tel': 'Phone',
-        'email': 'e-mail',
-        'vat_number': 'VAT #',
-        'currency': 'Currency',
-        'services': 'Services',
-        'service': 'Service',
-        'unit_cost': 'Unit Cost',
-        'quantity': 'Quantity',
-        'line_total': 'Line Total',
-        'summary': 'Summary',
-        'subtotal': 'Subtotal',
-        'discount': 'Discount',
-        'vat': 'VAT',
-        'total': 'Total',
-        'subtotal': 'Subtotal:',
-        'vat_amount': 'VAT Amount:',
-        'final_total': 'Final Total:',
-        'client_name': 'Client Name:',
-        'client_terms': 'Terms of Payment',
-        'invoice_date': 'Invoice Date:',
-        'transfer_text': 'Please transfer the amount on the bank account indicated below',
-        'bank_info': 'Account Inormation',
-    },
-    'fr': {
-        'invoice': 'Facture',
-        'date': 'Date',
-        'client': 'Client',
-        'recipient': '----',
-        'tel': '---',
-        'email': '---',
-        'vat_number': '---',
-        'currency': 'Devise',
-        'services': 'Services',
-        'service': 'Service',
-        'unit_cost': 'Coût Unitaire',
-        'quantity': 'Quantité',
-        'line_total': 'Total de la Ligne',
-        'summary': 'Résumé',
-        'subtotal': 'Sous-total',
-        'discount': 'Remise',
-        'vat': 'TVA',
-        'total': 'Total',
-        'transfer_text': '',
-        'bank_info': '-----',
-        'client_terms': '------',
-    },
-    'de': {
-        'invoice': 'Rechnung',
-        'date': 'Datum',
-        'client': 'Kunde',
-        'recipient': 'Empfänger',
-        'tel': 'Tel.',
-        'email': 'E-mail',
-        'vat_number': 'USt-ID',
-        'recipient': 'Empfänger',
-        'currency': 'Währung',
-        'services': 'Dienstleistungen',
-        'service': 'Dienstleistung',
-        'unit_cost': 'Einzelpreis',
-        'quantity': 'Menge',
-        'line_total': 'Gesamtbetrag',
-        'summary': 'Zusammenfassung',
-        'subtotal': 'Zwischensumme',
-        'discount': 'Rabatt',
-        'vat': 'USt',
-        'total': 'Gesamt',
-        'transfer_text': 'Bitte überweisen Sie die Summe auf das unten angegebene Konto',
-        'bank_info': 'Konto-Information',
-        'client_terms': 'Zahlungsbedingungen',
-    }
-}
 
-# Define personas
-PERSONAS = {
-    'persona1': {
-        'prefix': 'Mr.',
-        'first_name': 'John',
-        'last_name': 'Doe',
-        'suffix': 'Jr.',
-        'address': {
-            'street': '123 Main St',
-            'city': 'Anytown',
-            'postal_code': '12345',
-            'state': 'CA',
-            'country': 'USA'
-        },
-        'tel': '123-456-7890',
-        'email': 'john.doe@example.com',
-        'vat_number': 'US123456789',
-        'bank_info': {
-            'account_holder': 'John Doe',
-            'bank_name': 'Bank of America',
-            'iban': 'US12345678901234567890',
-            'bic': 'BOFAUS3N'
-        }
-    },
-    'persona2': {
-        'prefix': 'Ms.',
-        'first_name': 'Jane',
-        'last_name': 'Smith',
-        'suffix': '',
-        'address': {
-            'street': '456 Elm St',
-            'city': 'Othertown',
-            'postal_code': '67890',
-            'state': 'NY',
-            'country': 'USA'
-        },
-        'tel': '987-654-3210',
-        'email': 'jane.smith@example.com',
-        'vat_number': 'US987654321',
-        'bank_info': {
-            'account_holder': 'Jane Smith',
-            'bank_name': 'Chase Bank',
-            'iban': 'US09876543210987654321',
-            'bic': 'CHASUS33'
-        }
-    }
-    # Add more personas as needed
-}
+
+
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)

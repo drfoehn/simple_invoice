@@ -1,0 +1,48 @@
+{
+    "persona1": {
+        "prefix": "Mr.",
+        "first_name": "John",
+        "last_name": "Doe",
+        "logo": "img/logo_persona1.png",
+        "suffix": "Jr.",
+        "address": {
+            "street": "123 Main St",
+            "city": "Anytown",
+            "postal_code": "12345",
+            "state": "CA",
+            "country": "USA"
+        },
+        "tel": "123-456-7890",
+        "email": "john.doe@example.com",
+        "vat_number": "US123456789",
+        "bank_info": {
+            "account_holder": "John Doe",
+            "bank_name": "Bank of America",
+            "iban": "US12345678901234567890",
+            "bic": "BOFAUS3N"
+        }
+    },
+    "persona2": {
+        "prefix": "Ms.",
+        "first_name": "Jane",
+        "last_name": "Smith",
+        "logo": "img/logo_persona2.png",
+        "suffix": "",
+        "address": {
+            "street": "456 Elm St",
+            "city": "Othertown",
+            "postal_code": "67890",
+            "state": "NY",
+            "country": "USA"
+        },
+        "tel": "987-654-3210",
+        "email": "jane.smith@example.com",
+        "vat_number": "US987654321",
+        "bank_info": {
+            "account_holder": "Jane Smith",
+            "bank_name": "Chase Bank",
+            "iban": "US09876543210987654321",
+            "bic": "CHASUS33"
+        }
+    }
+}
