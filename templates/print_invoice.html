@@ -21,7 +21,7 @@
     <h1 class="invoice_title">{{ language_dict['invoice'] }} #{{ invoice.invoice_number }}</h1>
         </div>
         <div class="col">
-        <img src="{{ persona_info.logo }}" alt="Logo" class="logo"> <!-- Logo based on persona -->
+         <img src="{{ url_for('static', filename=persona_info.logo) }}" alt="{{ persona_info.first_name }} {{ persona_info.last_name }} Logo" style="width: 100px; height: auto;">
         </div>
     </div>
         <div class="row">
@@ -110,15 +110,15 @@
     <div class="container mt-4 invoice_footer">
         <div class="row">
             <div class="col invoice_persona_info">
-        <strong>{{ persona_info.prefix }} {{ persona_info.first_name }} {{ persona_info.last_name }} {{ persona_info.suffix }}</strong></br>
-        {{ persona_info.address.street }}</br>
-        {{ persona_info.address.city }}, {{ persona_info.address.state }} {{ persona_info.address.postal_code}}</br>
-        {{ persona_info.address.country }}</br>
-        {{ language_dict['tel'] }}: {{ persona_info.tel }}</br>
-        {{ language_dict['email'] }}: {{ persona_info.email }}</br>
-        {{ language_dict['vat_number'] }}: {{ persona_info.vat_number }}</br>
-    </div>
-    <div class="col invoice_bank_info">
+                <strong>{{ persona_info.prefix }} {{ persona_info.first_name }} {{ persona_info.last_name }} {{ persona_info.suffix }}</strong><br>
+                {{ persona_info.address.street }}<br>
+                {{ persona_info.address.city }}, {{ persona_info.address.state }} {{ persona_info.address.postal_code }}<br>
+                {{ persona_info.address.country }}<br>
+                {{ language_dict['tel'] }}: {{ persona_info.tel }}<br>
+                {{ language_dict['email'] }}: {{ persona_info.email }}<br>
+                {{ language_dict['vat_number'] }}: {{ persona_info.vat_number }}<br>
+            </div>
+            <div class="col invoice_bank_info">
     <strong>{{ language_dict['bank_info'] }}</strong></br>
     {{ persona_info.bank_info.account_holder }}</br>
     Bank Name: {{ persona_info.bank_info.bank_name }}</br>
