@@ -1,31 +1,78 @@
 /* static/styles.css */
 
-@media print {
-    body {
-        width: 210mm; /* A4 width */
-        height: 297mm; /* A4 height */
-        font-size: 12pt; /* Adjust font size for printing */
-        margin: 0; /* Remove default margin */
-        padding: 20mm; /* Add padding for print */
-    }
-    .no-print {
-        display: none; /* Hide elements with class 'no-print' when printing */
-    }
+/* General styles */
+.print-invoice {
+    font-family: Arial, sans-serif; /* Set a default font */
+    color: #333; /* Default text color */
+    background-color: white; /* Ensure a white background for printing */
+    margin: 0; /* Remove default margin */
+    padding: 20mm; /* Add padding for print */
+    position: relative; /* Set position relative for absolute positioning of footer */
+    min-height: 297mm; /* Ensure the invoice takes at least A4 height */
+    box-sizing: border-box; /* Include padding in height calculations */
+}
+
+h1, h3, h4 {
+    margin: 0; /* Remove default margins for headings */
+}
+
+.invoice_title {
+    font-size: 34pt; /* Adjust title font size */
+    padding-bottom: 2em; /* Space below title */
+}
+
+.client_details, .invoice_total {
+    padding-bottom: 2em; /* Space below client details and total */
 }
 
 .logo {
-    position: absolute;
+    position: absolute; /* Position logo */
     top: 5mm; /* Adjust as needed */
     right: 20mm; /* Adjust as needed */
     max-width: 100px; /* Adjust size as needed */
 }
 
-.invoice_title,
-.client_details,
-.invoice_total{
-    padding-bottom: 2em;
+
+.invoice_footer {
+    font-size: 8pt;
+    background-color: #f9f9f9; /* Light grey background for footer */
+    padding: 10px; /* Add padding to footer */
+    position: absolute; /* Position footer absolutely */
+    bottom: 10mm; /* Distance from the bottom of the page */
+    left: 0; /* Align to the left */
+    right: 0; /* Align to the right */
+    width: 100%; /* Full width */
 }
 
-.invoice_footer{
-    background-color: #f3f4f5;
+/* Print styles */
+@media print {
+    .print-invoice {
+        -webkit-print-color-adjust: exact; /* Use exact colors */
+        print-color-adjust: exact; /* Standard property */
+        
+        width: 210mm; /* A4 width */
+        height: 297mm; /* A4 height */
+        font-size: 12pt; /* Adjust font size for printing */
+        margin: 0; /* Remove default margin */
+        padding: 10mm; /* Adjust padding: top/bottom, left/right */
+        background-color: rgb(255, 255, 255); /* Ensure a white background for printing */
+        position: relative; /* Ensure relative positioning for footer */
+    }
+
+    .invoice_footer {
+        position: fixed; /* Position footer absolutely */
+        bottom: 10mm; /* Distance from the bottom of the page */
+        left: 0; /* Align to the left */
+        right: 0; /* Align to the right */
+        width: 100%; /* Full width */
+    }
+
+    .no-print {
+        display: none; /* Hide elements with class 'no-print' when printing */
+    }
+
+    .alert-danger {
+        background-color: red !important; /* Ensure alert background is red */
+        color: white !important; /* Ensure text is visible */
+    }
 }
