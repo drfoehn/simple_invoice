@@ -59,6 +59,71 @@ A simple invoicing application built with Flask, SQLAlchemy, and Bootstrap. This
    python -c "from app import db; db.create_all()"
    ```
 
+## Customizing Personas and Translations
+
+### Adapting Personas
+
+1. **Locate the `personas.json` file** in the root directory of the project. This file contains the persona information used in the application.
+
+2. **Edit the `personas.json` file** to add or modify personas. The structure of the file is as follows:
+
+   ```json
+   {
+       "persona1": {
+           "prefix": "Mr.",
+           "first_name": "John",
+           "last_name": "Doe",
+           "logo": "img/logo_persona1.png",
+           "suffix": "Jr.",
+           "address": {
+               "street": "123 Main St",
+               "city": "Anytown",
+               "postal_code": "12345",
+               "state": "CA",
+               "country": "USA"
+           },
+           "tel": "123-456-7890",
+           "email": "john.doe@example.com",
+           "vat_number": "US123456789",
+           "bank_info": {
+               "account_holder": "John Doe",
+               "bank_name": "Bank of America",
+               "iban": "US12345678901234567890",
+               "bic": "BOFAUS3N"
+           }
+       },
+       ...
+   }
+   ```
+
+3. **Add new personas** by following the same structure. Ensure that each persona has a unique key (e.g., `persona2`, `persona3`, etc.).
+
+### Adapting Translations
+
+1. **Locate the `translations.json` file** in the root directory of the project. This file contains the translations for different languages used in the application.
+
+2. **Edit the `translations.json` file** to add or modify translations. The structure of the file is as follows:
+
+   ```json
+   {
+       "en": {
+           "invoice": "Invoice",
+           "date": "Date",
+           ...
+       },
+       "fr": {
+           "invoice": "Facture",
+           "date": "Date",
+           ...
+       },
+       ...
+   }
+   ```
+
+3. **Add new languages** by following the same structure. Ensure that each language has a unique key (e.g., `de` for German, `es` for Spanish, etc.).
+
+4. **Modify existing translations** to fit your needs by changing the text within the quotes.
+
 ## Usage
 
 1. **Run the application**:
