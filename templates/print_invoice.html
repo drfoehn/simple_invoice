@@ -132,29 +132,10 @@
 
     <!-- Print and Download Buttons -->
     <div class="mt-4 no-print">
-        <button class="btn btn-primary" onclick="window.print();">Print Invoice</button>
-        <button class="btn btn-success" id="downloadInvoice">Download Invoice as PDF</button>
+        <button class="btn btn-primary" onclick="window.print();">Print Invoice (as PDF)</button>
+
     </div>
 </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-    // JavaScript to handle the download functionality
-    document.getElementById('downloadInvoice').addEventListener('click', function() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
 
-        // Get the content of the invoice
-        const invoiceContent = document.querySelector('.print-invoice').innerHTML; // Use the correct class
-
-        // Add the content to the PDF
-        doc.html(invoiceContent, {
-            callback: function (doc) {
-                doc.save('invoice.pdf'); // Save the PDF
-            },
-            x: 10,
-            y: 10
-        });
-    });
-</script>
 {% endblock %}
