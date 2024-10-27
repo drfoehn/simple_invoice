@@ -1,8 +1,9 @@
 {
     "persona1": {
-        "prefix": "Mr.",
+        "prefix": "Prof. Dr.",
         "first_name": "John",
         "last_name": "Doe",
+        "company_name": "Doe Enterprises",
         "logo": "img/logo_persona1.png",
         "suffix": "Jr.",
         "address": {
@@ -26,6 +27,7 @@
         "prefix": "Ms.",
         "first_name": "Jane",
         "last_name": "Smith",
+        "company_name": "Smith Consulting",
         "logo": "img/logo_persona2.png",
         "suffix": "",
         "address": {
