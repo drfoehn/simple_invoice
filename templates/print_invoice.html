@@ -113,13 +113,18 @@
     <div class="container mt-4 invoice_footer  bg-light p-3">
         <div class="row">
             <div class="col invoice_persona_info">
-                <strong>{{ persona_info.prefix }} {{ persona_info.first_name }} {{ persona_info.last_name }} {{ persona_info.suffix }}</strong><br>
-                {{ persona_info.address.street }}<br>
-                {{ persona_info.address.city }}, {{ persona_info.address.state }} {{ persona_info.address.postal_code }}<br>
-                {{ persona_info.address.country }}<br>
-                {{ language_dict['tel'] }}: {{ persona_info.tel }}<br>
-                {{ language_dict['email'] }}: {{ persona_info.email }}<br>
-                {{ language_dict['vat_number'] }}: {{ persona_info.vat_number }}<br>
+                <div>
+                    {% if persona_info.company_name %}
+                        <strong>{{ persona_info.company_name }}</strong><br>
+                    {% endif %}
+                    <strong>{{ persona_info.prefix }} {{ persona_info.first_name }} {{ persona_info.last_name }} {{ persona_info.suffix }}</strong><br>
+                    {{ persona_info.address.street }}<br>
+                    {{ persona_info.address.city }}, {{ persona_info.address.state }} {{ persona_info.address.postal_code }}<br>
+                    {{ persona_info.address.country }}<br>
+                    {{ language_dict['tel'] }}: {{ persona_info.tel }}<br>
+                    {{ language_dict['email'] }}: {{ persona_info.email }}<br>
+                    {{ language_dict['vat_number'] }}: {{ persona_info.vat_number }}<br>
+                </div>
             </div>
             <div class="col invoice_bank_info">
     <strong>{{ language_dict['bank_info'] }}</strong></br>
