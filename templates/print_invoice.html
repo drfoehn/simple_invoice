@@ -15,13 +15,14 @@
         <input type="hidden" name="language" value="{{ request.args.get('language', 'en') }}">
         <button type="submit" class="btn btn-info">Update</button>
     </form> -->
-<div class="container mt-4">
+    <div class="print-invoice"> 
+        <div class="container mt-4">
     <div class="row">
         <div class="col">
     <h1 class="invoice_title">{{ language_dict['invoice'] }} #{{ invoice.invoice_number }}</h1>
         </div>
-        <div class="col">
-         <img src="{{ url_for('static', filename=persona_info.logo) }}" alt="{{ persona_info.first_name }} {{ persona_info.last_name }} Logo" style="width: 100px; height: auto;">
+        <div class="col logo">
+         <img src="{{ url_for('static', filename=persona_info.logo) }}" class="logo"alt="{{ persona_info.first_name }} {{ persona_info.last_name }} Logo" style="width: 100px; height: auto;">
         </div>
     </div>
         <div class="row">
@@ -31,7 +32,9 @@
         </div>
     <div class="row client_details">
         <div class="col-6">
-            <p><strong>{{ client.first_name }} {{ client.last_name }}</strong></p>
+
+            <p><strong>{{ client.company_name }}</strong></p>
+            {{ client.first_name }} {{ client.last_name }}</br>
             {{ client.street }}</br>
             {{ client.city }}, {{ client.state }} {{ client.postal_code }}</br>
             {{ client.country }}</br>
@@ -50,7 +53,7 @@
     
 
     <h3 class="invocie_sevices_title">{{ language_dict['services'] }}</h3>
-    <table class="table table-bordered">
+    <table class="table">
         <thead>
             <tr>
                 <th>{{ language_dict['service'] }}</th>
@@ -107,7 +110,7 @@
     </div>
 </div>
 
-    <div class="container mt-4 invoice_footer">
+    <div class="container mt-4 invoice_footer  bg-light p-3">
         <div class="row">
             <div class="col invoice_persona_info">
                 <strong>{{ persona_info.prefix }} {{ persona_info.first_name }} {{ persona_info.last_name }} {{ persona_info.suffix }}</strong><br>
@@ -133,7 +136,7 @@
         <button class="btn btn-success" id="downloadInvoice">Download Invoice as PDF</button>
     </div>
 </div>
-
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
     // JavaScript to handle the download functionality
@@ -142,15 +145,16 @@
         const doc = new jsPDF();
 
         // Get the content of the invoice
-        const invoiceContent = document.querySelector('.container').innerHTML;
+        const invoiceContent = document.querySelector('.print-invoice').innerHTML; // Use the correct class
 
         // Add the content to the PDF
-        doc.fromHTML(invoiceContent, 15, 15, {
-            'width': 170
+        doc.html(invoiceContent, {
+            callback: function (doc) {
+                doc.save('invoice.pdf'); // Save the PDF
+            },
+            x: 10,
+            y: 10
         });
-
-        // Save the PDF
-        doc.save('invoice.pdf');
     });
 </script>
 {% endblock %}
