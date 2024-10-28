@@ -15,6 +15,7 @@ A simple invoicing application built with Flask, SQLAlchemy, and Bootstrap. This
 - Python 3.x
 - Flask
 - Flask-SQLAlchemy
+- Flask-HTTPAuth
 
 ## Installation
 
@@ -51,13 +52,26 @@ A simple invoicing application built with Flask, SQLAlchemy, and Bootstrap. This
    pip install -r requirements.txt
    ```
 
-4. **Set up the database**:
+## Configuration
 
-   Run the following command to create the database and tables:
+### Setting Up `config.py`
 
-   ```bash
-   python -c "from app import db; db.create_all()"
+The application requires a configuration file named `config.py` to store sensitive information such as the secret key and authentication credentials. 
+
+1. **Create a `config.py` file** in the root directory of the project.
+
+2. **Add the following content to `config.py`**:
+
+   ```python
+   class Config:
+       SECRET_KEY = 'your_secret_key_here'  # Replace with a strong secret key
+       USERNAME = 'your_username_here'        # Replace with your desired username
+       PASSWORD = 'your_password_here'        # Replace with your desired password
    ```
+
+   - **SECRET_KEY**: This is used by Flask for session management and should be a strong, random key.
+   - **USERNAME**: The username for HTTP Basic Authentication.
+   - **PASSWORD**: The password for HTTP Basic Authentication.
 
 ## Customizing Personas and Translations
 
@@ -126,7 +140,10 @@ A simple invoicing application built with Flask, SQLAlchemy, and Bootstrap. This
 
 ## Usage
 
-1. **Run the application**:
+1. **Initialize the database**:
+   The application uses SQLite for the database. The database and tables will be created automatically when you run the application for the first time.
+
+2. **Run the application**:
 
    ```bash
    python app.py
@@ -134,11 +151,16 @@ A simple invoicing application built with Flask, SQLAlchemy, and Bootstrap. This
 
    The app will be available at `http://127.0.0.1:8080`.
 
-2. **Access the application**: Open your web browser and navigate to `http://127.0.0.1:8080` to start using the invoicing app.
+3. **Access the application**: Open your web browser and navigate to `http://127.0.0.1:8080` to start using the invoicing app.
 
-3. **Create clients and invoices**: Use the provided forms to add clients and create invoices.
+4. **Authentication**:
+   When prompted, enter the credentials specified in your `config.py` file:
+   - **Username**: `your_username_here`
+   - **Password**: `your_password_here`
 
-4. **Print invoices**: You can print invoices directly from the application.
+5. **Create clients and invoices**: Use the provided forms to add clients and create invoices.
+
+6. **Print invoices**: You can print invoices directly from the application.
 
 ## Contributing
 
