@@ -121,9 +121,13 @@
                     {{ persona_info.address.street }}<br>
                     {{ persona_info.address.city }}, {{ persona_info.address.state }} {{ persona_info.address.postal_code }}<br>
                     {{ persona_info.address.country }}<br>
+                    {% if persona_info.tel %}
                     {{ language_dict['tel'] }}: {{ persona_info.tel }}<br>
+                    {% endif %}
                     {{ language_dict['email'] }}: {{ persona_info.email }}<br>
+                    {% if persona_info.vat_number %}
                     {{ language_dict['vat_number'] }}: {{ persona_info.vat_number }}<br>
+                    {% endif %}
                 </div>
             </div>
             <div class="col invoice_bank_info">

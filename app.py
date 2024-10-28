@@ -5,16 +5,20 @@ from datetime import datetime
 import logging
 import pdb
 import json
+from flask_httpauth import HTTPBasicAuth
+from config import Config  # Import the Config class
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__, static_folder='static')  
+auth = HTTPBasicAuth()
+app.config.from_object(Config)  # Load the configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///invoicing.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Set a secret key for session management
-app.secret_key = 'your_secret_key_here'  # Replace with a strong secret key
+app.secret_key = app.config['SECRET_KEY']  # Replace with a strong secret key
 
 db = SQLAlchemy(app)
 
@@ -33,6 +37,13 @@ try:
 except json.JSONDecodeError as e:
     logging.error(f"Error loading translations.json: {e}")
     LANGUAGES = {}
+
+# Define the authentication logic
+@auth.verify_password
+def verify_password(username, password):
+    if username == app.config['USERNAME'] and password == app.config['PASSWORD']:
+        return True
+    return False
 
 # Define the Client model
 class Client(db.Model):
@@ -82,6 +93,7 @@ with app.app_context():
 
 # Define the routes
 @app.route('/')
+@auth.login_required
 def index():
     clients = Client.query.all()
     invoices = Invoice.query.all()  # Fetch all invoices
@@ -390,5 +402,9 @@ def edit_invoice(invoice_id):
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run(debug=False)
+
+
+
+
 
