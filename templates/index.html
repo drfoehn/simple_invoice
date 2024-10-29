@@ -29,7 +29,7 @@
                         <form method="GET" action="{{ url_for('print_invoice', invoice_id=invoice.id) }}" style="display:inline;">
                             <select name="persona" id="persona_{{ invoice.id }}">
                                 {% for key, persona in PERSONAS.items() %}
-                                    <option value="{{ key }}">{{ persona.first_name }} {{ persona.last_name }}</option>
+                                    <option value="{{ key }}">{% if persona.company_name %}LMA - {% endif %}{{ persona.first_name }} {{ persona.last_name }}</option>
                                 {% endfor %}
                             </select>
                             <select name="language" id="language_{{ invoice.id }}">
