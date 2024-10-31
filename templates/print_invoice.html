@@ -40,7 +40,7 @@
             {{ client.country }}</br>
             {{ language_dict['tel'] }}: {{ client.phone }}</br>
             {{ language_dict['email'] }}: {{ client.email }}</br>
-            {{ language_dict['vat_number'] }}: {{ client.vat_number }}</br>
+            {{ language_dict['tax_info'] }}: {{ client.tax_info }}</br>
         </div>    
         <div class="col-6 ">
             <p class="text-right">{{ persona_info.address.city }}, {{ invoice.invoice_date.strftime('%Y-%m-%d') }}</p>
@@ -125,7 +125,10 @@
                         {{ language_dict['tel'] }}: {{ persona_info.tel }}<br>
                     {% endif %}
                     {{ language_dict['email'] }}: {{ persona_info.email }}<br>
-                    {{ language_dict['vat_number'] }}: {{ persona_info.vat_number }}<br>
+                    <u>{{ language_dict['tax_info'] }}: <br></u>
+                    {{ persona_info.tax_info1 }}<br>
+                    {{ persona_info.tax_info2 }}<br>
+                    {{ persona_info.tax_info3 }}<br>
                 </div>
             </div>
             <div class="col invoice_bank_info">

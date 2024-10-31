@@ -1,50 +1,108 @@
 {
     "persona1": {
-        "prefix": "Prof. Dr.",
-        "first_name": "John",
-        "last_name": "Doe",
-        "company_name": "Doe Enterprises",
+        "prefix": "Dr.",
+        "first_name": "FirstName1",
+        "last_name": "LastName1",
+        "company_name": "Generic Company 1",
         "logo": "img/logo_persona1.png",
-        "suffix": "Jr.",
+        "suffix": "",
         "address": {
-            "street": "123 Main St",
-            "city": "Anytown",
+            "street": "123 Generic St.",
+            "city": "Generic City",
             "postal_code": "12345",
-            "state": "CA",
-            "country": "USA"
+            "state": "Generic State",
+            "country": "Generic Country"
         },
-        "tel": "123-456-7890",
-        "email": "john.doe@example.com",
-        "vat_number": "US123456789",
+        "tel": "+1 (555) 000-0001",
+        "email": "generic1@example.com",
+        "tax_info1": "Company registration number: 123456789",
+        "tax_info2": "TPS/TVH: 12345 6789 RT0001 (Federal Taxes)",
+        "tax_info3": "TVQ: 12345 6789 TQ0001 (Provincial Taxes)",
         "bank_info": {
-            "account_holder": "John Doe",
-            "bank_name": "Bank of America",
-            "iban": "US12345678901234567890",
-            "bic": "BOFAUS3N"
+            "account_holder": "Generic Account Holder 1",
+            "bank_name": "Generic Bank 1",
+            "iban": "GENERICIBAN1",
+            "account_number": "0000001",
+            "bic_swift": "GENERICSWIFT1"
         }
     },
     "persona2": {
-        "prefix": "Ms.",
-        "first_name": "Jane",
-        "last_name": "Smith",
-        "company_name": "Smith Consulting",
+        "prefix": "Prof. Dr.",
+        "first_name": "FirstName2",
+        "last_name": "LastName2",
+        "company_name": "Generic Company 2",
         "logo": "img/logo_persona2.png",
+        "suffix": "Suffix2",
+        "address": {
+            "street": "456 Generic Ave.",
+            "city": "Generic City",
+            "postal_code": "67890",
+            "state": "Generic State",
+            "country": "Generic Country"
+        },
+        "tel": "+1 (555) 000-0002",
+        "email": "generic2@example.com",
+        "tax_info1": "Company registration number: 987654321",
+        "tax_info2": "TPS/TVH: 98765 4321 RT0001 (Federal Taxes)",
+        "tax_info3": "TVQ: 98765 4321 TQ0001 (Provincial Taxes)",
+        "bank_info": {
+            "account_holder": "Generic Account Holder 2",
+            "bank_name": "Generic Bank 2",
+            "iban": "GENERICIBAN2",
+            "account_number": "0000002",
+            "bic_swift": "GENERICSWIFT2"
+        }
+    },
+    "persona3": {
+        "prefix": "Dr.",
+        "first_name": "FirstName3",
+        "last_name": "LastName3",
+        "company_name": "Generic Company 3",
+        "logo": "img/logo_persona3.png",
         "suffix": "",
         "address": {
-            "street": "456 Elm St",
-            "city": "Othertown",
-            "postal_code": "67890",
-            "state": "NY",
-            "country": "USA"
+            "street": "789 Generic Blvd.",
+            "city": "Generic City",
+            "postal_code": "13579",
+            "state": "Generic State",
+            "country": "Generic Country"
         },
-        "tel": "987-654-3210",
-        "email": "jane.smith@example.com",
-        "vat_number": "US987654321",
+        "tel": "+1 (555) 000-0003",
+        "email": "generic3@example.com",
+        "tax_info1": "Company registration number: 123123123",
+        "tax_info2": "TPS/TVH: 12312 3123 RT0001 (Federal Taxes)",
+        "tax_info3": "TVQ: 12312 3123 TQ0001 (Provincial Taxes)",
         "bank_info": {
-            "account_holder": "Jane Smith",
-            "bank_name": "Chase Bank",
-            "iban": "US09876543210987654321",
-            "bic": "CHASUS33"
+            "account_holder": "Generic Account Holder 3",
+            "bank_name": "Generic Bank 3",
+            "iban": "GENERICIBAN3",
+            "account_number": "0000003",
+            "bic_swift": "GENERICSWIFT3"
+        }
+    },
+    "persona4": {
+        "prefix": "Prof. Dr.",
+        "first_name": "FirstName4",
+        "last_name": "LastName4",
+        "company_name": "Generic Company 4",
+        "logo": "img/logo_persona4.png",
+        "suffix": "Suffix4",
+        "address": {
+            "street": "321 Generic Rd.",
+            "city": "Generic City",
+            "postal_code": "24680",
+            "state": "Generic State",
+            "country": "Generic Country"
+        },
+        "tel": "+1 (555) 000-0004",
+        "email": "generic4@example.com",
+        "tax_info1": "VAT/Ust-ID: GENERICVATID4",
+        "bank_info": {
+            "account_holder": "Generic Account Holder 4",
+            "bank_name": "Generic Bank 4",
+            "iban": "GENERICIBAN4",
+            "account_number": "0000004",
+            "bic_swift": "GENERICSWIFT4"
         }
     }
 }

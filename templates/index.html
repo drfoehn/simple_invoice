@@ -15,7 +15,7 @@
                 <th>Invoice Date</th>
                 <th>Invoice Total</th>
                 <th>Invoice State</th>
-                <th>Actions</th>
+                <th>Invoice Number</th>
             </tr>
         </thead>
         <tbody>
@@ -25,18 +25,25 @@
                     <td>{{ invoice.invoice_date }}</td>
                     <td>{{ invoice.total }}</td>
                     <td>{{ invoice.state }}</td>
-                    <td>
+                    <td>{{ invoice.invoice_number }}</td>
+                </tr>
+                <tr>
+                    <td colspan="5">
                         <form method="GET" action="{{ url_for('print_invoice', invoice_id=invoice.id) }}" style="display:inline;">
-                            <select name="persona" id="persona_{{ invoice.id }}">
-                                {% for key, persona in PERSONAS.items() %}
-                                    <option value="{{ key }}">{% if persona.company_name %}LMA - {% endif %}{{ persona.first_name }} {{ persona.last_name }}</option>
-                                {% endfor %}
-                            </select>
-                            <select name="language" id="language_{{ invoice.id }}">
-                                <option value="en">English</option>
-                                <option value="fr">Français</option>
-                                <option value="de">Deutsch</option>
-                            </select>
+                            <div class="form-group d-inline-block mr-2">
+                                <select name="persona" id="persona_{{ invoice.id }}" class="form-control">
+                                    {% for key, persona in PERSONAS.items() %}
+                                        <option value="{{ key }}">{% if persona.company_name %}LMA - {% endif %}{{ persona.first_name }} {{ persona.last_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group d-inline-block mr-2">
+                                <select name="language" id="language_{{ invoice.id }}" class="form-control">
+                                    <option value="en">English</option>
+                                    <option value="fr">Français</option>
+                                    <option value="de">Deutsch</option>
+                                </select>
+                            </div>
                             <button type="submit" class="btn btn-info">Print</button>
                         </form>
                         <form method="POST" action="{{ url_for('delete_invoice', invoice_id=invoice.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this invoice?');">
