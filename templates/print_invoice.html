@@ -40,7 +40,7 @@
             {{ client.country }}</br>
             {{ language_dict['tel'] }}: {{ client.phone }}</br>
             {{ language_dict['email'] }}: {{ client.email }}</br>
-            {{ language_dict['tax_info'] }}: {{ client.tax_info }}</br>
+            {{ language_dict['vat_number'] }}: {{ client.vat_number }}</br>
         </div>    
         <div class="col-6 ">
             <p class="text-right">{{ persona_info.address.city }}, {{ invoice.invoice_date.strftime('%Y-%m-%d') }}</p>
@@ -66,23 +66,23 @@
             {% for service in services %}
             <tr>
                 <td>{{ service.service }}</td>
-                <td>{{ service.unit_cost }} {{ invoice.currency }}</td>
+                <td>{{ service.unit_cost | thousands_separator }} {{ invoice.currency }}</td>
                 <td>{{ service.quantity }}</td>
-                <td>{{ service.line_total }} {{ invoice.currency }}</td>
+                <td>{{ service.line_total | thousands_separator }} {{ invoice.currency }}</td>
             </tr>
             {% endfor %}
             <tr>
                 <td></td>
                 <td></td>
                 <td><strong>{{ language_dict['subtotal'] }}</strong></td>
-                <td><strong>{{ subtotal }} {{ invoice.currency }}</strong></td>
+                <td><strong>{{ subtotal | thousands_separator }} {{ invoice.currency }}</strong></td>
             </tr>
             {% if discount > 0 %}
             <tr>
                 <td></td>
                 <td></td>
-                <td>{{ language_dict['discount'] }}</td>
-                <td>{{ discount }} %</td>
+                <td>{{ language_dict['discount'] }} ({{ discount }}%)</td>
+                <td>- {{ discount_amount | thousands_separator }} {{ invoice.currency }}</td>
             </tr>
             {% endif %}
             {% if vat_amount > 0 %}
@@ -90,14 +90,14 @@
                 <td></td>
                 <td></td>
                 <td>{{ language_dict['vat'] }} ({{ invoice.vat_percentage }}%)</td>
-                <td>{{ vat_amount }}</td>
+                <td>{{ vat_amount | thousands_separator }} {{ invoice.currency }}</td>
             </tr>
             {% endif %}
         </tbody>
     </table>
 
     
-    <h4 class="invoice_total text-right">{{ language_dict['total'] }}: {{ total }} {{ invoice.currency }}</h4>
+    <h4 class="invoice_total text-right">{{ language_dict['total'] }}: {{ total | thousands_separator }} {{ invoice.currency }}</h4>
     <div class="row">
         <div class="col">
             <strong>{{ language_dict['client_terms'] }}</strong>

@@ -17,4 +17,4 @@ __pycache__/
 .ipynb_checkpoints/
 
 config.py
-personas.json
+personas_LMA.json

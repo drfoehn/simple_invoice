@@ -24,6 +24,14 @@ app.secret_key = app.config['SECRET_KEY']  # Replace with a strong secret key
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+# Custom filter to format numbers with a space as a thousand separator
+@app.template_filter('thousands_separator')
+def thousands_separator(value):
+    """Format a number with a space as a thousand separator."""
+    if isinstance(value, (int, float)):
+        return f"{value:,.0f}".replace(',', ' ')
+    return value
+
 # Load persona information
 try:
     with open('personas.json', encoding='utf-8') as f:
@@ -228,13 +236,19 @@ def add_invoice():
             # Create a service entry to be added later
             services.append(InvoiceService(service=service, unit_cost=unit_cost, quantity=quantity, line_total=line_total))
 
-        # Calculate total after adding all services
-        total = subtotal - (subtotal * (discount / 100))
+        # Calculate discount amount
+        discount_amount = subtotal * (discount / 100)
 
-        # Apply VAT if selected
+        # Calculate total after discount
+        total_after_discount = subtotal - discount_amount
+
+        # Calculate VAT amount if applicable
+        vat_amount = 0
         if apply_vat:
-            vat_amount = total * (vat_percentage / 100)
-            total += vat_amount  # Add VAT to total
+            vat_amount = total_after_discount * (vat_percentage / 100)
+
+        # Final total
+        total = total_after_discount + vat_amount
 
         # Create a new invoice
         new_invoice = Invoice(
@@ -293,7 +307,8 @@ def print_invoice(invoice_id):
         # Calculate subtotal and total
         subtotal = sum(service.line_total for service in services)
         discount = invoice.discount  # Use the discount from the invoice
-        total = subtotal - (subtotal * (discount / 100))
+        discount_amount = subtotal * (discount / 100)  # Calculate discount amount
+        total_after_discount = subtotal - discount_amount  # Total after discount
 
         # Check if VAT is applied
         apply_vat = invoice.apply_vat
@@ -301,8 +316,8 @@ def print_invoice(invoice_id):
         vat_amount = 0
 
         if apply_vat:
-            vat_amount = total * (vat_percentage / 100)
-            total += vat_amount  # Add VAT to total
+            vat_amount = total_after_discount * (vat_percentage / 100)  # Calculate VAT amount
+        total = total_after_discount + vat_amount  # Final total
 
         # Pass all necessary data to the template
         return render_template('print_invoice.html', 
@@ -310,7 +325,8 @@ def print_invoice(invoice_id):
                                services=services, 
                                subtotal=subtotal, 
                                discount=discount, 
-                               vat_amount=vat_amount, 
+                               discount_amount=discount_amount,  # Pass discount amount
+                               vat_amount=vat_amount,  # Pass VAT amount
                                total=total, 
                                language_dict=language_dict, 
                                persona_info=persona_info,
